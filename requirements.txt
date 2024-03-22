@@ -1,0 +1,5 @@
+pillow
+requests
+scratchattach
+gunicorn
+Flask
