@@ -26,5 +26,3 @@ def GetPart(part, username):
 @client.event
 def on_ready():
     print("Request handler is running")
-
-client.run()
