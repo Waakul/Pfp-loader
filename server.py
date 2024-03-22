@@ -1,9 +1,6 @@
 import scratchattach as scratch3
 import os
-from dotenv import load_dotenv
 from functions import *
-
-load_dotenv()
 
 session = scratch3.Session(os.getenv("SESSIONID"), username="Waakul_Test")
 conn = session.connect_cloud("987765422")
