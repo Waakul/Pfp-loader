@@ -3,4 +3,4 @@ requests
 scratchattach
 gunicorn
 Flask
-dotenv
+python-dotenv
