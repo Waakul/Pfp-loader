@@ -33,5 +33,6 @@ def getimg(username):
     ImgURL = f"https://uploads.scratch.mit.edu/get_image/user/{userid}_500x500.png"
     resp = requests.get(ImgURL)
     img = Image.open(BytesIO(resp.content))
+    img = img.resize((50, 50))
     img.save(f"IMG/{username}.png", format="png", lossless=True)
     encode(username)
