@@ -12,7 +12,7 @@ def encode(image):
     img = Image.open(f"IMG/{image}.png")
     img = img.convert("RGB")
     img = img.resize((50, 50))
-    img.save(f"IMG/{image}.png")
+    img.save(f"IMG/{image}.png", format="png", lossless=True)
     list1 = list(img.getdata())
     for i in range(len(list1)):
         pixel_value = rgb_hex(list1[i])
