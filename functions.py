@@ -12,7 +12,7 @@ def encode(image):
     img = Image.open(f"IMG/{image}.png")
     img = img.convert("RGB")
     img = img.resize((50, 50))
-    img.save(f"IMG/{image}.png", format="png", lossless=True)
+    img.save(f"IMG/{image}.png")
     list1 = list(img.getdata())
     for i in range(len(list1)):
         pixel_value = rgb_hex(list1[i])
@@ -33,5 +33,5 @@ def getimg(username):
     ImgURL = f"https://uploads.scratch.mit.edu/get_image/user/{userid}_500x500.png"
     resp = requests.get(ImgURL)
     img = Image.open(BytesIO(resp.content))
-    img.save(f"IMG/{username}.png")
+    img.save(f"IMG/{username}.png", format="png", lossless=True)
     encode(username)
