@@ -116,5 +116,3 @@ async function clearList() {
 }
 
 export { getImg, writeToList };
-
-console.log(await getImg('Waakul'));
