@@ -1,0 +1,21 @@
+{
+  "name": "pfp-loader",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Waakul/Pfp-loader.git"
+  },
+  "author": "Waakul",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Waakul/Pfp-loader/issues"
+  },
+  "homepage": "https://github.com/Waakul/Pfp-loader#readme",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.8.4",
+    "jimp": "^1.6.0",
+    "sharp": "^0.33.5"
+  }
+}
