@@ -10,9 +10,9 @@ function rgbHex(rgb) {
 }
 
 async function encode(image) {
-    const imgPath = `${dirPathIMG}/${image}.png`;
+    const imgPath = `${dirPathIMG}/${image}`;
     const img = await Jimp.read(imgPath);
-    img.resize({ w: 50, h: 50});
+    img.resize({ w: 50, h: 50 });
     await img.write(imgPath);
 
     const listData = [];
@@ -38,6 +38,26 @@ async function encode(image) {
 }
 
 async function getImg(username) {
+    const files = fs.readdirSync(dirPathIMG);
+    const oneDayInMs = 24 * 60 * 60 * 1000;
+
+    for (const file of files) {
+        if (file.startsWith(username)) {
+            const timestamp = parseInt(file.split('_')[1].split('.')[0], 10);
+            if (Date.now() - timestamp < oneDayInMs) {
+                return await encode(file);
+            } else {
+                fs.unlinkSync(`${dirPathIMG}/${file}`);
+                return await fetchImg(username);
+            }
+        }
+    }
+
+    // the username has never been downloaded before
+    return await fetchImg(username);
+}
+
+async function fetchImg(username) {
     const userResp = await axios.get(`https://api.scratch.mit.edu/users/${username}/`);
     const userId = userResp.data.id;
     const imgUrl = `https://uploads.scratch.mit.edu/get_image/user/${userId}_500x500.png`;
@@ -45,9 +65,9 @@ async function getImg(username) {
     const imgResp = await axios.get(imgUrl, { responseType: 'arraybuffer' });
 
     const buffer = imgResp.data;
-        const arrayBuffer = buffer instanceof ArrayBuffer
-            ? buffer // If it's already an ArrayBuffer
-            : buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    const arrayBuffer = buffer instanceof ArrayBuffer
+        ? buffer // If it's already an ArrayBuffer
+        : buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 
     // JIMP doesnt support webp so we need to convert it to png if its webp first
     const dataView = new DataView(arrayBuffer);
@@ -61,16 +81,16 @@ async function getImg(username) {
         const pngBuffer = await sharp.default(webpBuffer).png().toBuffer();
         imgResp.data = pngBuffer;
     }
-
-    console.log(await imgResp.headers.get('content-type'));
     const img = await Jimp.read(imgResp.data);
-    img.resize({ w: 50, h: 50});
-    await img.write(`${dirPathIMG}/${username}.png`);
+    img.resize({ w: 50, h: 50 });
 
-    return await encode(username);
+    const imageName = `${username}_${Date.now()}.png`;
+    await img.write(`${dirPathIMG}/${imageName}`);
+
+    return await encode(imageName);
 }
 
-async function writeToList(data){
+async function writeToList(data) {
     let rawData = fs.readFileSync(filePathJSON, 'utf-8');
     let project = JSON.parse(rawData);
 
@@ -85,7 +105,7 @@ async function writeToList(data){
     fs.writeFileSync(filePath, updatedData, 'utf-8');
 }
 
-async function clearList(){
+async function clearList() {
     let rawData = fs.readFileSync(filePathJSON, 'utf-8');
     const project = JSON.parse(rawData);
 
@@ -97,4 +117,4 @@ async function clearList(){
 
 export { getImg, writeToList };
 
-console.log(await getImg('griffpatch'));
+console.log(await getImg('Waakul'));
