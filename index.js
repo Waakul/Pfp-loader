@@ -11,6 +11,8 @@ server.listen(process.env.UPTIME_PORT, () => {
 
 import * as utils from './utils.js';
 
+await utils.clearList();
+
 (async function main() {
     while (true) {
         const usernames = await utils.scrapeFilteredComments();

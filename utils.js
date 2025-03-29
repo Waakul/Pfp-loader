@@ -175,7 +175,7 @@ async function clearList() {
     project.targets[0].lists['%bpHi#Dg)[c*ALjF)V~b'][1] = [];
 
     const updatedData = JSON.stringify(project);
-    fs.writeFileSync(filePath, updatedData, 'utf-8');
+    fs.writeFileSync(filePathJSON, updatedData, 'utf-8');
 }
 
 async function getScratchCookies() {
@@ -222,4 +222,4 @@ async function updateProjectData() {
     }
 }
 
-export { getImg, writeToList, scrapeFilteredComments, updateProjectData };
+export { getImg, writeToList, scrapeFilteredComments, updateProjectData, clearList };
