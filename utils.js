@@ -2,7 +2,6 @@ import fs from 'fs';
 import axios from 'axios';
 import { Jimp } from 'jimp';
 import puppeteer from 'puppeteer';
-import 'dotenv/config';
 import { json } from 'stream/consumers';
 import { get } from 'http';
 
@@ -103,41 +102,60 @@ async function getImg(username) {
 }
 
 async function fetchImg(username) {
-    const userResp = await axios.get(`https://api.scratch.mit.edu/users/${username}/`);
-    const userId = userResp.data.id;
-    const imgUrl = `https://uploads.scratch.mit.edu/get_image/user/${userId}_500x500.png`;
+    try {
+        const userResp = await axios.get(`https://api.scratch.mit.edu/users/${username}/`);
+        const userId = userResp.data.id;
+        const imgUrl = `https://uploads.scratch.mit.edu/get_image/user/${userId}_500x500.png`;
 
-    const imgResp = await axios.get(imgUrl, { responseType: 'arraybuffer' });
+        const imgResp = await axios.get(imgUrl, { responseType: 'arraybuffer' });
 
-    const buffer = imgResp.data;
-    const arrayBuffer = buffer instanceof ArrayBuffer
-        ? buffer // If it's already an ArrayBuffer
-        : buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+        const buffer = imgResp.data;
+        const arrayBuffer = buffer instanceof ArrayBuffer
+            ? buffer // If it's already an ArrayBuffer
+            : buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 
-    // JIMP doesnt support webp so we need to convert it to png if its webp first
-    const dataView = new DataView(arrayBuffer);
+        // JIMP doesnt support webp so we need to convert it to png if its webp first
+        const dataView = new DataView(arrayBuffer);
 
-    const isRIFF = dataView.getUint32(0, true) === 0x46464952; // 'RIFF' in little-endian
-    const isWEBP = dataView.getUint32(8, true) === 0x50424557; // 'WEBP' in little-endian
+        const isRIFF = dataView.getUint32(0, true) === 0x46464952; // 'RIFF' in little-endian
+        const isWEBP = dataView.getUint32(8, true) === 0x50424557; // 'WEBP' in little-endian
 
-    if (isRIFF && isWEBP) {
-        const webpBuffer = Buffer.from(imgResp.data);
-        const sharp = await import('sharp');
-        const pngBuffer = await sharp.default(webpBuffer).png().toBuffer();
-        imgResp.data = pngBuffer;
+        if (isRIFF && isWEBP) {
+            const webpBuffer = Buffer.from(imgResp.data);
+            const sharp = await import('sharp');
+            const pngBuffer = await sharp.default(webpBuffer).png().toBuffer();
+            imgResp.data = pngBuffer;
+        }
+        const img = await Jimp.read(imgResp.data);
+        img.resize({ w: 50, h: 50 });
+
+        const imageName = `${username}_${Date.now()}.png`;
+        await img.write(`${dirPathIMG}/${imageName}`);
+
+        return await encode(imageName);
+    } catch (error) {
+        console.error('Error fetching image:', error.message);
+        return null;
     }
-    const img = await Jimp.read(imgResp.data);
-    img.resize({ w: 50, h: 50 });
-
-    const imageName = `${username}_${Date.now()}.png`;
-    await img.write(`${dirPathIMG}/${imageName}`);
-
-    return await encode(imageName);
 }
 
 async function writeToList(data) {
+    if (data === null) {
+        return;
+    }
+    const username = await data.split("|")[0];
+
     let rawData = fs.readFileSync(filePathJSON, 'utf-8');
     let project = JSON.parse(rawData);
+
+    project.targets[0].lists['%bpHi#Dg)[c*ALjF)V~b'][1].forEach((element, index) => {
+        if (element.split("|")[0] === username) {
+            project.targets[0].lists['%bpHi#Dg)[c*ALjF)V~b'][1].splice(index, 1);
+        }
+    });
+
+    let updatedData = JSON.stringify(project);
+    fs.writeFileSync(filePathJSON, updatedData, 'utf-8');
 
     project.targets[0].lists['%bpHi#Dg)[c*ALjF)V~b'][1].length > 10 ? clearList() : null;
 
@@ -146,8 +164,8 @@ async function writeToList(data) {
 
     project.targets[0].lists['%bpHi#Dg)[c*ALjF)V~b'][1].push(data);
 
-    const updatedData = JSON.stringify(project);
-    fs.writeFileSync(filePath, updatedData, 'utf-8');
+    updatedData = JSON.stringify(project);
+    fs.writeFileSync(filePathJSON, updatedData, 'utf-8');
 }
 
 async function clearList() {
@@ -161,18 +179,18 @@ async function clearList() {
 }
 
 async function getScratchCookies() {
-    const response = await axios.post('https://scratch.mit.edu/login/', 
+    const response = await axios.post('https://scratch.mit.edu/login/',
         {
-            "username": process.env.USERNAME, 
+            "username": process.env.USERNAME,
             "password": process.env.PASSWORD
-        }, 
+        },
         {
             headers: {
                 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
                 "x-csrftoken": "a",
                 "x-requested-with": "XMLHttpRequest",
                 "referer": "https://scratch.mit.edu",
-                "Content-Type": "application/json", 
+                "Content-Type": "application/json",
                 "Cookie": "scratchcsrftoken=a;scratchlanguage=en;"
             }
         }

@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
+  "scripts": {
+    "start": "pm2 start index.js --name pfp-loader",
+    "stop": "pm2 stop pfp-loader",
+    "restart": "pm2 restart pfp-loader",
+    "delete": "pm2 delete pfp-loader"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Waakul/Pfp-loader.git"
