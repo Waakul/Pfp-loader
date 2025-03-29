@@ -1,6 +1,0 @@
-pillow
-requests
-scratchattach
-gunicorn
-Flask
-python-dotenv
