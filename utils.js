@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Jimp } from 'jimp';
 import puppeteer from 'puppeteer';
 import 'dotenv/config';
+import { json } from 'stream/consumers';
+import { get } from 'http';
 
 const filePathJSON = './assets/project.json';
 const dirPathIMG = './assets/IMG';
@@ -158,15 +160,42 @@ async function clearList() {
     fs.writeFileSync(filePath, updatedData, 'utf-8');
 }
 
-async function updateProjectData(cookies) {
+async function getScratchCookies() {
+    const response = await axios.post('https://scratch.mit.edu/login/', 
+        {
+            "username": process.env.USERNAME, 
+            "password": process.env.PASSWORD
+        }, 
+        {
+            headers: {
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
+                "x-csrftoken": "a",
+                "x-requested-with": "XMLHttpRequest",
+                "referer": "https://scratch.mit.edu",
+                "Content-Type": "application/json", 
+                "Cookie": "scratchcsrftoken=a;scratchlanguage=en;"
+            }
+        }
+    )
+    const cookies = response.headers['set-cookie'].map(cookie => cookie.split(';')[0]).join('; ');
+    return cookies;
+}
+
+async function updateProjectData() {
     const rawData = fs.readFileSync(filePathJSON, 'utf-8');
     const projectData = JSON.parse(rawData);
 
     try {
-        const response = await axios.put('https://projects.scratch.mit.edu/1153505010', projectData, {
+        const cookies = await getScratchCookies();
+
+        const response = await axios.put(`https://projects.scratch.mit.edu/${process.env.PROJECT_ID}`, projectData, {
             headers: {
-            'Content-Type': 'application/json',
-            'Cookie': cookies,
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
+                "x-csrftoken": "a",
+                "x-requested-with": "XMLHttpRequest",
+                "referer": "https://scratch.mit.edu",
+                "Content-Type": "application/json",
+                'Cookie': cookies,
             },
         });
         console.log('Project data updated successfully:', response.status);
@@ -175,4 +204,4 @@ async function updateProjectData(cookies) {
     }
 }
 
-export { getImg, writeToList, scrapeFilteredComments };
+export { getImg, writeToList, scrapeFilteredComments, updateProjectData };
