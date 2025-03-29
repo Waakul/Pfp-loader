@@ -19,7 +19,7 @@ async function usernameExists(username) {
 }
 
 async function scrapeFilteredComments() {
-    const browser = await puppeteer.launch({ headless: false }); // Debug mode enabled
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     await page.goto(`https://scratch.mit.edu/projects/${process.env.PROJECT_ID}/`, { waitUntil: 'networkidle2' });
 
