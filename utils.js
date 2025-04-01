@@ -157,11 +157,6 @@ async function writeToList(data) {
     let updatedData = JSON.stringify(project);
     fs.writeFileSync(filePathJSON, updatedData, 'utf-8');
 
-    project.targets[0].lists['%bpHi#Dg)[c*ALjF)V~b'][1].length > 10 ? clearList() : null;
-
-    rawData = fs.readFileSync(filePathJSON, 'utf-8');
-    project = JSON.parse(rawData);
-
     project.targets[0].lists['%bpHi#Dg)[c*ALjF)V~b'][1].push(data);
 
     updatedData = JSON.stringify(project);

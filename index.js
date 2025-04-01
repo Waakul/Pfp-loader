@@ -11,10 +11,10 @@ server.listen(process.env.UPTIME_PORT, () => {
 
 import * as utils from './utils.js';
 
-await utils.clearList();
-
 (async function main() {
     while (true) {
+        await utils.clearList();
+
         const usernames = await utils.scrapeFilteredComments();
         let listToWrite = [];
         for (const username of usernames) {
@@ -23,7 +23,7 @@ await utils.clearList();
             listToWrite.push(username.sender+"|"+img);
         }
 
-        listToWrite.forEach(async (element) => {
+        await listToWrite.forEach(async (element) => {
             await utils.writeToList(element);
         });
 
