@@ -26,13 +26,15 @@ async function scrapeFilteredComments() {
     // Wait for comments to load
     await page.waitForSelector('.comments-list .comment-container');
 
-    // Extract sender and username in the browser context
+    // Extract sender and username in the browser context, limiting to the top 10 comments
     const comments = await page.evaluate(() => {
-        return Array.from(document.querySelectorAll('.comments-list .comment-container')).map(container => {
-            const sender = container.querySelector('.comment-top-row .username')?.innerText.trim() || null;
-            const username = container.querySelector('.comment-bubble .comment-content .emoji-text')?.innerText.trim() || null;
-            return { sender, username };
-        });
+        return Array.from(document.querySelectorAll('.comments-list .comment-container'))
+            .slice(0, 10) // Limit to the top 10 comments
+            .map(container => {
+                const sender = container.querySelector('.comment-top-row .username')?.innerText.trim() || null;
+                const username = container.querySelector('.comment-bubble .comment-content .emoji-text')?.innerText.trim() || null;
+                return { sender, username };
+            });
     });
 
     let newCommenters = [];
@@ -56,7 +58,6 @@ function rgbHex(rgb) {
 async function encode(image) {
     const imgPath = `${dirPathIMG}/${image}`;
     const img = await Jimp.read(imgPath);
-    img.resize({ w: 50, h: 50 });
     await img.write(imgPath);
 
     const listData = [];
@@ -127,7 +128,7 @@ async function fetchImg(username) {
             imgResp.data = pngBuffer;
         }
         const img = await Jimp.read(imgResp.data);
-        img.resize({ w: 50, h: 50 });
+        img.resize({ w: 100, h: 100 });
 
         const imageName = `${username}_${Date.now()}.png`;
         await img.write(`${dirPathIMG}/${imageName}`);
