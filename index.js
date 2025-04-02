@@ -20,7 +20,7 @@ import * as utils from './utils.js';
         for (const username of usernames) {
             const img = await utils.getImg(username.username);
             if (img === null) continue;
-            listToWrite.push(username.sender+"|"+img);
+            listToWrite.push(username.sender+"|"+username.username+"|"+img);
         }
 
         await listToWrite.forEach(async (element) => {
