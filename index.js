@@ -13,26 +13,26 @@ import * as utils from './utils.js';
 
 (async function main() {
     while (true) {
-        await utils.clearList();
-
-        const usernames = await utils.scrapeFilteredComments();
-        let listToWrite = [];
-        for (const username of usernames) {
-            const img = await utils.getImg(username.username);
-            if (img === null) continue;
-            listToWrite.push(username.sender+"|"+username.username+"|"+img);
-        }
         try {
+            await utils.clearList();
+
+            const usernames = await utils.scrapeFilteredComments();
+            let listToWrite = [];
+            for (const username of usernames) {
+                const img = await utils.getImg(username.username);
+                if (img === null) continue;
+                listToWrite.push(username.sender+"|"+username.username+"|"+img);
+            }
             await listToWrite.forEach(async (element) => {
                 await utils.writeToList(element);
             });
+
+            await utils.updateProjectData();
+            
+            await new Promise(resolve => setTimeout(resolve, 5000));
         }
         catch (error) {
-            console.error('Error writing to list:', error.message);
+            console.error('Error:', error.message);
         }
-
-        await utils.updateProjectData();
-        
-        await new Promise(resolve => setTimeout(resolve, 5000));
    }
 })();
