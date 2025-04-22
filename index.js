@@ -22,10 +22,14 @@ import * as utils from './utils.js';
             if (img === null) continue;
             listToWrite.push(username.sender+"|"+username.username+"|"+img);
         }
-
-        await listToWrite.forEach(async (element) => {
-            await utils.writeToList(element);
-        });
+        try {
+            await listToWrite.forEach(async (element) => {
+                await utils.writeToList(element);
+            });
+        }
+        catch (error) {
+            console.error('Error writing to list:', error.message);
+        }
 
         await utils.updateProjectData();
         
